@@ -5,10 +5,10 @@ const app = express();
 const https = require("https");
 const { Server } = require("socket.io");
 const privateKey = fs.readFileSync(
-  "/etc/letsencrypt/live/<your domain name here>/privkey.pem"
+  "/etc/letsencrypt/live/cicd.blogdoang.com/privkey.pem"
 );
 const certificate = fs.readFileSync(
-  "/etc/letsencrypt/live/<your domain name here>/fullchain.pem"
+  "/etc/letsencrypt/live/cicd.blogdoang.com/fullchain.pem"
 );
 const credentials = {
   key: privateKey,
