@@ -75,12 +75,16 @@ jobs:
         gcloud compute instances add-metadata $GCE_INSTANCE \
           --zone "$GCE_INSTANCE_ZONE" \
           --metadata=startup-script="#! /bin/bash
-            docker image prune -af
-            curl --location --request GET 'domains.google.com/nic/update?hostname=cicd.blogdoang.com' \
-              --header 'User-Agent: VM' \
-              --header 'Authorization: Basic $DDNS_AUTH_STRING'"
+            docker image prune -af"
     - name: Deploy
       run: |-
         gcloud compute instances update-container "$GCE_INSTANCE" \
           --zone "$GCE_INSTANCE_ZONE" \
           --container-image "gcr.io/$PROJECT_ID/$GCE_INSTANCE-image:$GITHUB_SHA"
+    # Purge old images from GCR (not latest)
+    - name: Purge GCR images
+      run: |-
+        gcloud container images list-tags gcr.io/$PROJECT_ID/$GCE_INSTANCE-image \
+          --format="get(digest)" --filter="NOT tags=$GITHUB_SHA" | \
+          awk -v image_path="gcr.io/$PROJECT_ID/$GCE_INSTANCE-image@" '{print image_path $1}' | \
+          xargs -r gcloud container images delete --force-delete-tags --quiet
